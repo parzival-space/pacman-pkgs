@@ -76,7 +76,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           path: './packages'
-          name: '*-package'
+          pattern: '*-package'
           merge-multiple: 'true'
       - name: Create build user
         run: |
