@@ -6,8 +6,6 @@ on:
       - development
     paths-ignore:
       - .github
-    branches-ignore:
-      - repo/*
   workflow_dispatch:
 
 permissions:
