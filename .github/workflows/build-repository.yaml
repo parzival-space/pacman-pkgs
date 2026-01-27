@@ -12,22 +12,22 @@ permissions:
   contents: write
   packages: write
 
+concurrency:
+  group: build-repository-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REPO_NAME: parzival-space
   PKGBUILDS_DIR: pkgbuilds
+  RELEASE_TAG: repository
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
       image: archlinux:multilib-devel
-    strategy:
-      matrix:
-        include:
-          - arch: x86_64
     env:
-      REPO_PATH: .repo/${{ matrix.arch }}
-      RELEASE_TAG: ${{ matrix.arch }}
+      REPO_PATH: .repo
       BUILD_USER: builder
     steps:
       - name: Update system & install requirements

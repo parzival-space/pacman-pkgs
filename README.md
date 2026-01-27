@@ -9,7 +9,7 @@ Add the following code snippet to your `/etc/pacman.conf` file:
 ```
 [parzival-space]
 SigLevel = Optional TrustAll
-Server = https://github.com/parzival-space/pacman-pkgs/releases/download/$arch
+Server = https://github.com/parzival-space/pacman-pkgs/releases/download/repository
 ```
 
 Then, run `sudo pacman -Sy` to update your package database.
