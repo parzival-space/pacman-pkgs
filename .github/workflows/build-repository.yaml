@@ -50,6 +50,11 @@ jobs:
         run: |
           sudo -u builder makepkg -sri --noconfirm
 
+      - name: Build eso-addons-manager-bin
+        working-directory: ./${{ env.PKGBUILDS_DIR }}/eso-addons-manager-bin
+        run: |
+          sudo -u builder makepkg -sri --noconfirm
+
       - name: Add built packages to repository
         run: |
           # patch package names to replace ':' with '_' for github compatibility
