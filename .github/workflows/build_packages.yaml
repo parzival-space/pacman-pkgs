@@ -46,9 +46,10 @@ jobs:
           sudo -u builder mkdir -p ./${{ env.REPO_PATH }}
           sudo -u builder repo-add ./${{ env.REPO_PATH }}/${{ env.REPO_NAME }}.db.tar.gz ./**/*.pkg.tar.zst
           sudo -u builder cp ./**/*.pkg.tar.zst ./${{ env.REPO_PATH }}/
+          ls -lh ./${{ env.REPO_PATH }}/
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v6.0.0
         with:
           name: parzival-repo
-          path: './${{ env.REPO_PATH }}'
+          path: './${{ env.REPO_PATH }}/**'
