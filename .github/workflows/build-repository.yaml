@@ -92,7 +92,7 @@ jobs:
           # copy all built packages (excluding debug packages) to ./repository
           sudo -u builder cp ./packages/*.pkg.tar.zst ./repository/
           sudo -u builder find ./repository/ -name "*-debug-*.pkg.tar.zst" -delete
-      - name: Upload a Build Artifact
+      - name: Update Repository Release
         uses: ncipollo/release-action@v1
         with:
           tag: '${{ env.RELEASE_TAG }}'
@@ -100,4 +100,15 @@ jobs:
           omitName: 'true'
           allowUpdates: 'true'
           artifacts: './repository/*.*'
+          body: |
+            ### Repository Installation
+            Add the following code snippet to your `/etc/pacman.conf` file:
+            
+            ```
+            [parzival-space]
+            SigLevel = Optional TrustAll
+            Server = https://github.com/${{ github.repository }}/releases/download/${{ env.RELEASE_TAG }}
+            ```
+  
+            Then, run `sudo pacman -Sy` to update your package database.
 
