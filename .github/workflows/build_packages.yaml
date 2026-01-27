@@ -1,0 +1,54 @@
+name: Build Packages
+
+on:
+  push:
+    branches:
+      - development
+    paths-ignore:
+      - .github
+    branches-ignore:
+      - repo/*
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:multi lib-devel
+    env:
+      REPO_NAME: parzival-space
+      REPO_PATH: .repo
+      BUILD_USER: builder
+    steps:
+      - name: Update system & install requirements
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm base-devel git sudo
+      - name: Create build user
+        run: |
+          useradd -m ${{ env.BUILD_USER }}
+          echo "${{ env.BUILD_USER }} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+      - name: Checkout build sources
+        uses: actions/checkout@v6
+      - name: Update permissions
+        run: |
+          chown -R builder:builder .
+
+      - name: Build parzival-gaming-meta
+        working-directory: ./parzival-gaming-meta
+        run: |
+          sudo -u builder makepkg -sri --noconfirm
+
+      - name: Add built packages to repository
+        run: |
+          sudo -u builder repo-add ./${{ env.REPO_PATH }}/${{ env.REPO_NAME }}.db.tar.gz ./**/*.pkg.tar.zst
+          sudo -u builder cp ./**/*.pkg.tar.zst ./${{ env.REPO_PATH }}/
+
+      - name: Test
+        run: |
+          ls -lh ./${{ env.REPO_PATH }}/
+          repo-query ./${{ env.REPO_PATH }}/${{ env.REPO_NAME }}.db.tar.gz
