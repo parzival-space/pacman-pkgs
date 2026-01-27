@@ -13,7 +13,7 @@ permissions:
   packages: write
 
 concurrency:
-  group: build-repository-${{ github.ref }}
+  group: build-repository-${{ github.ref }}-pkgs
   cancel-in-progress: true
 
 env:
