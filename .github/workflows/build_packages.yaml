@@ -6,6 +6,9 @@ on:
       - development
     paths-ignore:
       - .github
+      - README.md
+      - LICENSE
+      - .gitignore
   workflow_dispatch:
 
 permissions:
