@@ -25,6 +25,7 @@ jobs:
       REPO_PATH: .repo
       BUILD_USER: builder
       SOURCE_DIR: pkgbuilds
+      RELEASE_TAG: repo
     steps:
       - name: Update system & install requirements
         run: |
@@ -59,8 +60,9 @@ jobs:
       - name: Upload a Build Artifact
         uses: ncipollo/release-action@v1
         with:
-          tag: 'repo'
+          tag: '${{ env.RELEASE_TAG }}'
           omitBody: 'true'
           omitName: 'true'
+          allowUpdates: 'true'
           artifacts: '${{ env.REPO_PATH }}/*.*'
 
