@@ -1,31 +1,34 @@
-name: Build Packages
+name: Build Repository
 
 on:
   push:
     branches:
       - development
-    paths-ignore:
-      - .github
-      - README.md
-      - LICENSE
-      - .gitignore
+    paths:
+      - pkgbuilds
   workflow_dispatch:
 
 permissions:
   contents: write
   packages: write
 
+env:
+  REPO_NAME: parzival-space
+  PKGBUILDS_DIR: pkgbuilds
+
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
       image: archlinux:multilib-devel
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
     env:
-      REPO_NAME: parzival-space
-      REPO_PATH: .repo
+      REPO_PATH: .repo/${{ matrix.arch }}
+      RELEASE_TAG: ${{ matrix.arch }}
       BUILD_USER: builder
-      SOURCE_DIR: pkgbuilds
-      RELEASE_TAG: repo
     steps:
       - name: Update system & install requirements
         run: |
@@ -43,15 +46,18 @@ jobs:
           chown -R builder:builder .
 
       - name: Build parzival-gaming-meta
-        working-directory: ./${{ env.SOURCE_DIR }}/parzival-gaming-meta
+        working-directory: ./${{ env.PKGBUILDS_DIR }}/parzival-gaming-meta
         run: |
           sudo -u builder makepkg -sri --noconfirm
 
       - name: Add built packages to repository
         run: |
+          # patch package names to replace ':' with '_' for github compatibility
+          find ./${{ env.PKGBUILDS_DIR }}/ -name "*.pkg.tar.zst" -exec bash -c 'mv "$0" "${0//:/_}"' {} \;
+          
           sudo -u builder mkdir -p ./${{ env.REPO_PATH }}
-          sudo -u builder repo-add ./${{ env.REPO_PATH }}/${{ env.REPO_NAME }}.db.tar.gz ./${{ env.SOURCE_DIR }}/**/*.pkg.tar.zst
-          sudo -u builder cp ./${{ env.SOURCE_DIR }}/**/*.pkg.tar.zst ./${{ env.REPO_PATH }}/
+          sudo -u builder repo-add ./${{ env.REPO_PATH }}/${{ env.REPO_NAME }}.db.tar.gz ./${{ env.PKGBUILDS_DIR }}/**/*.pkg.tar.zst
+          sudo -u builder cp ./${{ env.PKGBUILDS_DIR }}/**/*.pkg.tar.zst ./${{ env.REPO_PATH }}/
 
       - name: test - compress repository into archive to bypass stupid ntfs check
         run: |
