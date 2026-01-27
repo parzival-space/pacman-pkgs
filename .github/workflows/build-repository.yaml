@@ -96,7 +96,6 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: '${{ env.RELEASE_TAG }}'
-          omitBody: 'true'
           omitName: 'true'
           allowUpdates: 'true'
           artifacts: './repository/*.*'
