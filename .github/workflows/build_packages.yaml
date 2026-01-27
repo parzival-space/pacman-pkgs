@@ -60,5 +60,5 @@ jobs:
         with:
           tag: 'repo'
           draft: true
-          artifacts: '${{ env.REPO_PATH }}/**'
+          artifacts: '${{ env.REPO_PATH }}/*.*'
 
