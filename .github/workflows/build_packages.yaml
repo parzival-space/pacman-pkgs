@@ -53,4 +53,5 @@ jobs:
         with:
           if-no-files-found: 'error'
           name: parzival-repo
+          include-hidden-files: true
           path: '${{ env.REPO_PATH }}/**'
