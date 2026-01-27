@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   build:
@@ -55,10 +56,9 @@ jobs:
           sudo -u builder tar -czf ${{ env.REPO_NAME }}-repo.tar.gz ${{ env.REPO_PATH }}
 
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v6.0.0
+        uses: ncipollo/release-action@v1
         with:
-          if-no-files-found: 'error'
-          name: parzival-repo
-          include-hidden-files: true
-          path: './${{ env.REPO_NAME }}-repo.tar.gz'
+          tag: 'repo'
+          draft: true
+          artifacts: '${{ env.REPO_PATH }}/**'
 
