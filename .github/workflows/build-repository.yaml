@@ -5,7 +5,7 @@ on:
     branches:
       - development
     paths:
-      - pkgbuilds
+      - pkgbuilds/**
   workflow_dispatch:
 
 permissions:
@@ -62,7 +62,10 @@ jobs:
           
           sudo -u builder mkdir -p ./${{ env.REPO_PATH }}
           sudo -u builder repo-add ./${{ env.REPO_PATH }}/${{ env.REPO_NAME }}.db.tar.gz ./${{ env.PKGBUILDS_DIR }}/**/*.pkg.tar.zst
+          
+          # copy all built packages (excluding debug packages) to repository
           sudo -u builder cp ./${{ env.PKGBUILDS_DIR }}/**/*.pkg.tar.zst ./${{ env.REPO_PATH }}/
+          sudo -u builder find ./${{ env.REPO_PATH }}/ -name "*-debug-*.pkg.tar.zst" -delete
 
       - name: test - compress repository into archive to bypass stupid ntfs check
         run: |
