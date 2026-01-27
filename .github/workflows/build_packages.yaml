@@ -24,6 +24,7 @@ jobs:
       REPO_NAME: parzival-space
       REPO_PATH: .repo
       BUILD_USER: builder
+      SOURCE_DIR: pkgbuilds
     steps:
       - name: Update system & install requirements
         run: |
@@ -41,15 +42,15 @@ jobs:
           chown -R builder:builder .
 
       - name: Build parzival-gaming-meta
-        working-directory: ./parzival-gaming-meta
+        working-directory: ./${{ env.SOURCE_DIR }}/parzival-gaming-meta
         run: |
           sudo -u builder makepkg -sri --noconfirm
 
       - name: Add built packages to repository
         run: |
           sudo -u builder mkdir -p ./${{ env.REPO_PATH }}
-          sudo -u builder repo-add ./${{ env.REPO_PATH }}/${{ env.REPO_NAME }}.db.tar.gz ./**/*.pkg.tar.zst
-          sudo -u builder cp ./**/*.pkg.tar.zst ./${{ env.REPO_PATH }}/
+          sudo -u builder repo-add ./${{ env.REPO_PATH }}/${{ env.REPO_NAME }}.db.tar.gz ./${{ env.SOURCE_DIR }}/**/*.pkg.tar.zst
+          sudo -u builder cp ./${{ env.SOURCE_DIR }}/**/*.pkg.tar.zst ./${{ env.REPO_PATH }}/
 
       - name: test - compress repository into archive to bypass stupid ntfs check
         run: |
@@ -59,6 +60,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: 'repo'
-          draft: true
+          omitBody: 'true'
+          omitName: 'true'
           artifacts: '${{ env.REPO_PATH }}/*.*'
 
