@@ -22,55 +22,75 @@ env:
   RELEASE_TAG: repository
 
 jobs:
-  build:
+  build_packages:
     runs-on: ubuntu-latest
     container:
       image: archlinux:multilib-devel
+    strategy:
+      matrix:
+        include:
+          - name: parzival-gaming-meta
+          - name: eso-addons-manager-bin
+          - name: eso-addons-manager
     env:
-      REPO_PATH: .repo
       BUILD_USER: builder
     steps:
       - name: Update system & install requirements
         run: |
           pacman -Syu --noconfirm
           pacman -S --noconfirm base-devel git sudo
+      - name: Checkout build sources
+        uses: actions/checkout@v6
       - name: Create build user
         run: |
           useradd -m ${{ env.BUILD_USER }}
           echo "${{ env.BUILD_USER }} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-
-      - name: Checkout build sources
-        uses: actions/checkout@v6
-      - name: Update permissions
-        run: |
           chown -R builder:builder .
-
-      - name: Build parzival-gaming-meta
-        working-directory: ./${{ env.PKGBUILDS_DIR }}/parzival-gaming-meta
+      - name: Build ${{ matrix.name }}
+        working-directory: ./${{ env.PKGBUILDS_DIR }}/${{ matrix.name }}
         run: |
           sudo -u builder makepkg -sri --noconfirm
-
-      - name: Build eso-addons-manager-bin
-        working-directory: ./${{ env.PKGBUILDS_DIR }}/eso-addons-manager-bin
+      - name: Rename package files for GitHub compatibility
         run: |
-          sudo -u builder makepkg -sri --noconfirm
+          find ./${{ env.PKGBUILDS_DIR }}/${{ matrix.name }}/ -name "*.pkg.tar.zst" -exec bash -c 'mv "$0" "${0//:/_}"' {} \;
+      - name: Upload ${{ matrix.name }} package artifact
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: ${{ matrix.name }}-package
+          include-hidden-files: 'true'
+          path: ./${{ env.PKGBUILDS_DIR }}/${{ matrix.name }}/*.pkg.tar.zst
 
+  build_repository:
+    needs: build_packages
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:multilib-devel
+    env:
+      BUILD_USER: builder
+    steps:
+      - name: Update system & install requirements
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm base-devel git sudo
+      - name: Download built package artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: './packages'
+          name: '*-package'
+          merge-multiple: 'true'
+      - name: Create build user
+        run: |
+          useradd -m ${{ env.BUILD_USER }}
+          echo "${{ env.BUILD_USER }} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          chown -R builder:builder .
       - name: Add built packages to repository
         run: |
-          # patch package names to replace ':' with '_' for github compatibility
-          find ./${{ env.PKGBUILDS_DIR }}/ -name "*.pkg.tar.zst" -exec bash -c 'mv "$0" "${0//:/_}"' {} \;
+          sudo -u builder mkdir -p ./repository
+          sudo -u builder repo-add ./repository/${{ env.REPO_NAME }}.db.tar.gz ./packages/**/*.pkg.tar.zst
           
-          sudo -u builder mkdir -p ./${{ env.REPO_PATH }}
-          sudo -u builder repo-add ./${{ env.REPO_PATH }}/${{ env.REPO_NAME }}.db.tar.gz ./${{ env.PKGBUILDS_DIR }}/**/*.pkg.tar.zst
-          
-          # copy all built packages (excluding debug packages) to repository
-          sudo -u builder cp ./${{ env.PKGBUILDS_DIR }}/**/*.pkg.tar.zst ./${{ env.REPO_PATH }}/
-          sudo -u builder find ./${{ env.REPO_PATH }}/ -name "*-debug-*.pkg.tar.zst" -delete
-
-      - name: test - compress repository into archive to bypass stupid ntfs check
-        run: |
-          sudo -u builder tar -czf ${{ env.REPO_NAME }}-repo.tar.gz ${{ env.REPO_PATH }}
-
+          # copy all built packages (excluding debug packages) to ./repository
+          sudo -u builder cp ./packages/**/*.pkg.tar.zst ./repository/
+          sudo -u builder find ./repository/ -name "*-debug-*.pkg.tar.zst" -delete
       - name: Upload a Build Artifact
         uses: ncipollo/release-action@v1
         with:
@@ -78,5 +98,5 @@ jobs:
           omitBody: 'true'
           omitName: 'true'
           allowUpdates: 'true'
-          artifacts: '${{ env.REPO_PATH }}/*.*'
+          artifacts: './repository/*.*'
 
