@@ -47,10 +47,6 @@ jobs:
           sudo -u builder repo-add ./${{ env.REPO_PATH }}/${{ env.REPO_NAME }}.db.tar.gz ./**/*.pkg.tar.zst
           sudo -u builder cp ./**/*.pkg.tar.zst ./${{ env.REPO_PATH }}/
 
-      - name: Test
-        run: |
-          ls -lh ./${{ env.REPO_PATH }}/
-          repo-query ./${{ env.REPO_PATH }}/${{ env.REPO_NAME }}.db.tar.gz
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v6.0.0
         with:
