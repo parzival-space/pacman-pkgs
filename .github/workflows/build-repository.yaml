@@ -85,11 +85,11 @@ jobs:
           chown -R builder:builder .
       - name: Add built packages to repository
         run: |
+          ls -la ./packages
           sudo -u builder mkdir -p ./repository
-          sudo -u builder repo-add ./repository/${{ env.REPO_NAME }}.db.tar.gz ./packages/**/*.pkg.tar.zst
+          sudo -u builder repo-add ./repository/${{ env.REPO_NAME }}.db.tar.gz ./packages/****/*.pkg.tar.zst
           
           # copy all built packages (excluding debug packages) to ./repository
-          ls -la ./packages
           sudo -u builder cp ./packages/****/*.pkg.tar.zst ./repository/
           sudo -u builder find ./repository/ -name "*-debug-*.pkg.tar.zst" -delete
       - name: Upload a Build Artifact
