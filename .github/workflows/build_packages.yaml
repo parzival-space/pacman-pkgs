@@ -15,7 +15,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: archlinux:multi lib-devel
+      image: archlinux:multilib-devel
     env:
       REPO_NAME: parzival-space
       REPO_PATH: .repo
