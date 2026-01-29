@@ -1,5 +1,4 @@
 name: Build Repository
-
 on:
   push:
     branches:
@@ -13,7 +12,7 @@ permissions:
   packages: write
 
 concurrency:
-  group: build-repository-${{ github.ref }}-pkgs
+  group: build-repository-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -22,16 +21,35 @@ env:
   RELEASE_TAG: repository
 
 jobs:
+  find_packages:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.set-packages.outputs.packages }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Find packages
+        id: set-packages
+        run: |
+          # find directories in pkgbuilds containing a PKGBUILD
+          packages=$(
+            find ${{ env.PKGBUILDS_DIR }} -mindepth 2 -maxdepth 2 -type f -name PKGBUILD \
+            -exec dirname {} \; \
+            | sed 's|^pkgbuilds/||' \
+            | sort -u \
+            | awk '{ printf "%s\"%s\"", sep, $0; sep=", " }'
+          )
+          echo "packages=[$packages]" >> $GITHUB_OUTPUT
+          echo "Found packages: $packages"
+
   build_packages:
+    needs: find_packages
     runs-on: ubuntu-latest
     container:
       image: archlinux:multilib-devel
     strategy:
       matrix:
-        include:
-          - name: parzival-gaming-meta
-          - name: eso-addons-manager-bin
-          - name: eso-addons-manager
+        name: ${{ fromJson(needs.find_packages.outputs.packages) }}
     env:
       BUILD_USER: builder
     steps:
