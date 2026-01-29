@@ -103,13 +103,13 @@ jobs:
           chown -R builder:builder .
       - name: Add built packages to repository
         run: |
+          # delete debug packages from ./packages
+          sudo -u builder find ./packages/ -name "*-debug-*.pkg.tar.zst" -delete
+          
           ls -la ./packages
           sudo -u builder mkdir -p ./repository
           sudo -u builder repo-add ./repository/${{ env.REPO_NAME }}.db.tar.gz ./packages/*.pkg.tar.zst
-          
-          # copy all built packages (excluding debug packages) to ./repository
           sudo -u builder cp ./packages/*.pkg.tar.zst ./repository/
-          sudo -u builder find ./repository/ -name "*-debug-*.pkg.tar.zst" -delete
       - name: Update Repository Release
         uses: ncipollo/release-action@v1
         with:
