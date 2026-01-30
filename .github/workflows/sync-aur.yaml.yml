@@ -81,7 +81,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
-        if: steps.aur_check.outputs.ignore == false || false
+        if: steps.aur_check.outputs.ignore != 'true'
         with:
           pkgname: ${{ matrix.package }}
           pkgbuild: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/PKGBUILD"
