@@ -1,10 +1,10 @@
 name: Sync AUR packages
 on:
   push:
-#    branches:
-#      - development
-#    paths:
-#      - pkgbuilds/**
+    #    branches:
+    #      - development
+    #    paths:
+    #      - pkgbuilds/**
     workflow_dispatch:
 
 permissions:
@@ -21,6 +21,11 @@ env:
   SSH_REPO_PATH: "parzival-space/"
 # todo: replace this shit with a hardcoded ssh uri
 #  AUR_REPO_HOST: "aur@aur.archlinux.org"
+
+# secrets:
+#   AUR_USERNAME: ""
+#   AUR_EMAIL: ""
+#   AUR_SSH_PRIVATE_KEY: ""
 
 jobs:
   find_packages:
@@ -44,15 +49,13 @@ jobs:
           echo "packages=[$packages]" >> $GITHUB_OUTPUT
           echo "Found packages: $packages"
 
-  validate_and_sync:
+  sync_with_aur:
     name: "Sync ${{ matrix.package }}"
     needs: find_packages
     runs-on: ubuntu-latest
     strategy:
       matrix:
         package: ${{ fromJson(needs.find_packages.outputs.packages) }}
-    container:
-      image: archlinux:multilib-devel
     env:
       BUILD_USER: builder
       BUILD_SOURCE_DIR: source
@@ -60,74 +63,45 @@ jobs:
       BUILD_SYNC_DIR: sync
       AUR_SSH_PACKAGE_URL: "ssh://${{ env.SSH_REPO_USER }}@${{ env.SSH_REPO_HOST}}/${{ env.SSH_REPO_PATH }}${{ matrix.package }}.git"
     steps:
-      # Step 1: Prepare Container
-      - name: "Prepare Container"
-        run: |
-          pacman -Syu --noconfirm base-devel git sudo openssh less
-          useradd -m ${{ env.BUILD_USER }}
-          echo "${{ env.BUILD_USER }} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-      - name: "Configure Git"
-        run: |
-          sudo -u ${{ env.BUILD_USER }} git config --global user.name "${{ secrets.AUR_GIT_USER || failure() }}"
-          sudo -u ${{ env.BUILD_USER }} git config --global user.email "${{ secrets.AUR_GIT_EMAIL || failure() }}"
-      - name: "Setup SSH for AUR"
-        run: |
-          sudo -u ${{ env.BUILD_USER }} mkdir -p /home/${{ env.BUILD_USER }}/.ssh
-          echo "${{ secrets.AUR_SSH_PRIVATE_KEY || failure() }}" | sudo -u ${{ env.BUILD_USER }} tee /home/${{ env.BUILD_USER }}/.ssh/id_rsa > /dev/null
-          sudo -u ${{ env.BUILD_USER }} chmod 600 /home/${{ env.BUILD_USER }}/.ssh/id_rsa
-          sudo -u ${{ env.BUILD_USER }} ssh-keyscan "${{ env.SSH_REPO_HOST}}" >> /home/${{ env.BUILD_USER }}/.ssh/known_hosts
-      # Step 2: Checkout Repositories
-      - name: "Checkout packages repository"
+      - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          path: "${{ env.BUILD_SOURCE_DIR }}"
-          persist-credentials: 'false'
-      - name: "Checkout AUR package: ${{ matrix.package }}"
+      - name: Check if package should be ignored
+        working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
+        id: aur_check
         run: |
-          sudo -u ${{ env.BUILD_USER }} \
-            git clone "${{ env.AUR_SSH_PACKAGE_URL }}" \
-            "${{ env.BUILD_SYNC_DIR }}"
-      # Step 3: Check for changes
-      - name: "Regenerate .SRCINFO"
-        working-directory: "./${{ env.BUILD_SOURCE_DIR }}/${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
-        run: |
-          sudo -u ${{ env.BUILD_USER }} makepkg --printsrcinfo | sudo -u ${{ env.BUILD_USER }} tee .SRCINFO
-      - name: "Compare Upstream and AUR"
-        run: |
-          # compare source file with aur source file (except .git)
-          diff_output=$(diff -rq --exclude='.git' \
-            "./${{ env.BUILD_SOURCE_DIR }}/${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}" \
-            "./${{ env.BUILD_SYNC_DIR }}" || true)
-          if [ -z "$diff_output" ]; then
-            echo "No changes detected between upstream and AUR for package ${{ matrix.package }}."
-            echo "Skipping further steps."
-            echo "changed=false" >> $GITHUB_OUTPUT
+          # ignore packages that contain a .no-aur-sync file
+          if [ -f .no-aur-sync ]; then
+              echo "Package ${{ matrix.package }} is marked to be ignored for AUR sync."
+              echo "ignore=true" >> $GITHUB_OUTPUT
           else
-            echo "Changes detected between upstream and AUR for package ${{ matrix.package }}:"
-            echo "$diff_output"
-            echo "changed=true" >> $GITHUB_OUTPUT
+              echo "ignore=false" >> $GITHUB_OUTPUT
           fi
-      - name: "Test Build Package"
-        if: steps.Compare_Upstream_and_AUR.outputs.changed == 'true'
+      - name: Generate commit message
+        working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
+        id: commit_message
         run: |
-          sudo -u ${{ env.BUILD_USER }} cp -r \
-            "./${{ env.BUILD_SOURCE_DIR }}/${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}" \
-            "./${{ env.BUILD_TEST_DIR }}"
-          sudo -u ${{ env.BUILD_USER }} makepkg -C -s --noconfirm \
-            --dir "./${{ env.BUILD_TEST_DIR }}"
-      - name: "Sync Changes to AUR"
-        if: steps.Compare_Upstream_and_AUR.outputs.changed == 'true'
-        run: |
-          # delete current AUR sync dir contents (except .git)
-          sudo -u ${{ env.BUILD_USER }} find "./${{ env.BUILD_SYNC_DIR }}" -mindepth 1 -not -name '.git' -exec rm -rf {} +
-          # copy new contents from source dir to sync dir
-          sudo -u ${{ env.BUILD_USER }} cp -r \
-            "./${{ env.BUILD_SOURCE_DIR }}/${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/." \
-            "./${{ env.BUILD_SYNC_DIR }}/"
-          # commit changes using last commit message from source repo
-          last_commit_message=$(sudo -u ${{ env.BUILD_USER }} git -C "./${{ env.BUILD_SOURCE_DIR }}" log -1 --pretty=%B)
-          sudo -u ${{ env.BUILD_USER }} git -C "./${{ env.BUILD_SYNC_DIR }}" add .
-          sudo -u ${{ env.BUILD_USER }} git -C "./${{ env.BUILD_SYNC_DIR }}" commit -m "$last_commit_message"
-          # push changes to AUR
-          sudo -u ${{ env.BUILD_USER }} git -C "./${{ env.BUILD_SYNC_DIR }}" push origin main --force
-        
+          # generate commit message based on latest commit affecting the PKGBUILD
+          latest_commit=$(git log -n 1 --pretty=format:"%s" -- "./")
+          
+          # extract version from PKGBUILD
+          pkgbuild_pkgver=$(grep -E '^pkgver=' "./PKGBUILD" | cut -d'=' -f2)
+          pkgbuild_pkgrel=$(grep -E '^pkgrel=' "./PKGBUILD" | cut -d'=' -f2)
+          
+          # commit message:
+          # Version bump to <pkgver>-<pkgrel>
+          # <latest_commit>
+          
+          commit_msg="Version bump to ${pkgbuild_pkgver}-${pkgbuild_pkgrel}\n\n${latest_commit}"
+          echo -e "commit_message=${commit_msg}" >> $GITHUB_OUTPUT
+      - name: Publish AUR package
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
+        if: steps.aur_check.outputs.ignore == 'false' or true
+        with:
+          pkgname: ${{ matrix.package }}
+          pkgbuild: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/PKGBUILD"
+          commit_message: ${{ steps.commit_message.outputs.commit_message }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          allow_empty_commits: false # prevent commits with no changes
+
