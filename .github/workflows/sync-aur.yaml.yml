@@ -90,6 +90,6 @@ jobs:
           commit_username: ${{ secrets.AUR_USERNAME }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           test: true
-          test_flags: '--clean --cleanbuild --syncdeps'
+          test_flags: '--clean --cleanbuild --syncdeps --install --noconfirm'
           allow_empty_commits: false # prevent commits with no changes
 
