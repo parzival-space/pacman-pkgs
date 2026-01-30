@@ -72,12 +72,12 @@ jobs:
           pkgbuild_pkgver=$(grep -E '^pkgver=' "./PKGBUILD" | cut -d'=' -f2)
           pkgbuild_pkgrel=$(grep -E '^pkgrel=' "./PKGBUILD" | cut -d'=' -f2)
           
-          # commit message:
-          # Version bump to <pkgver>-<pkgrel>
-          # <latest_commit>
-          
-          commit_msg="Version bump to ${pkgbuild_pkgver}-${pkgbuild_pkgrel}\n\n${latest_commit}"
-          echo -e "commit_message=${commit_msg}" >> $GITHUB_OUTPUT
+          echo "commit_message<<EOF" >> $GITHUB_OUTPUT
+          echo "Version bump to ${pkgbuild_pkgver}-${pkgbuild_pkgrel}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "Latest commit message:" >> $GITHUB_OUTPUT
+          echo "${latest_commit}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
         if: steps.aur_check.outputs.ignore == 'false' || true
@@ -88,5 +88,6 @@ jobs:
           commit_email: ${{ secrets.AUR_EMAIL }}
           commit_username: ${{ secrets.AUR_USERNAME }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          test: true
           allow_empty_commits: false # prevent commits with no changes
 
