@@ -1,11 +1,11 @@
 name: Sync AUR packages
 on:
-  push:
-    #    branches:
-    #      - development
-    #    paths:
-    #      - pkgbuilds/**
-    workflow_dispatch:
+#  push:
+#    branches:
+#      - development
+#    paths:
+#      - pkgbuilds/**
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -33,6 +33,7 @@ jobs:
             find ${{ env.PKGBUILDS_DIR }} -mindepth 2 -maxdepth 2 -type f -name PKGBUILD \
             -exec dirname {} \; \
             | sed 's|^pkgbuilds/||' \
+            | xargs -n 1 basename \
             | sort -u \
             | awk '{ printf "%s\"%s\"", sep, $0; sep=", " }'
           )
