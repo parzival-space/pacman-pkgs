@@ -47,6 +47,7 @@ jobs:
     strategy:
       matrix:
         package: ${{ fromJson(needs.find_packages.outputs.packages) }}
+      fail-fast: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -80,7 +81,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
-        if: steps.aur_check.outputs.ignore == 'false' || true
+        if: steps.aur_check.outputs.ignore == 'false'
         with:
           pkgname: ${{ matrix.package }}
           pkgbuild: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/PKGBUILD"
@@ -89,5 +90,6 @@ jobs:
           commit_username: ${{ secrets.AUR_USERNAME }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           test: true
+          test_flags: '--clean --cleanbuild --syncdeps'
           allow_empty_commits: false # prevent commits with no changes
 
