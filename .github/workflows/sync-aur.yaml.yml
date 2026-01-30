@@ -16,16 +16,6 @@ concurrency:
 
 env:
   PKGBUILDS_DIR: ./pkgbuilds
-  SSH_REPO_USER: "git"
-  SSH_REPO_HOST: "github.com"
-  SSH_REPO_PATH: "parzival-space/"
-# todo: replace this shit with a hardcoded ssh uri
-#  AUR_REPO_HOST: "aur@aur.archlinux.org"
-
-# secrets:
-#   AUR_USERNAME: ""
-#   AUR_EMAIL: ""
-#   AUR_SSH_PRIVATE_KEY: ""
 
 jobs:
   find_packages:
@@ -56,12 +46,6 @@ jobs:
     strategy:
       matrix:
         package: ${{ fromJson(needs.find_packages.outputs.packages) }}
-    env:
-      BUILD_USER: builder
-      BUILD_SOURCE_DIR: source
-      BUILD_TEST_DIR: test
-      BUILD_SYNC_DIR: sync
-      AUR_SSH_PACKAGE_URL: "ssh://${{ env.SSH_REPO_USER }}@${{ env.SSH_REPO_HOST}}/${{ env.SSH_REPO_PATH }}${{ matrix.package }}.git"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -95,7 +79,7 @@ jobs:
           echo -e "commit_message=${commit_msg}" >> $GITHUB_OUTPUT
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
-        if: steps.aur_check.outputs.ignore == 'false' or true
+        if: steps.aur_check.outputs.ignore == 'false' || true
         with:
           pkgname: ${{ matrix.package }}
           pkgbuild: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/PKGBUILD"
