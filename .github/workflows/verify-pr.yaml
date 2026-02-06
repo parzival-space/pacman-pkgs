@@ -13,6 +13,9 @@ concurrency:
   group: verify-pr-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  PKGBUILDS_DIR: pkgbuilds
+
 jobs:
   find_packages_with_changes:
     runs-on: ubuntu-latest
