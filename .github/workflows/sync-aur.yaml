@@ -19,6 +19,7 @@ env:
 
 jobs:
   find_packages:
+    name: "Find packages"
     runs-on: ubuntu-latest
     outputs:
       packages: ${{ steps.set-packages.outputs.packages }}
