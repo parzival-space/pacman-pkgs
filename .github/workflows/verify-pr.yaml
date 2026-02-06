@@ -26,7 +26,7 @@ jobs:
         run: |
           # find directories in pkgbuilds containing a PKGBUILD that have changes in the PR
           packages=$(
-            git diff --name-only ${{ github.event.before }} ${{ github.event.after }} -- pkgbuilds/**/PKGBUILD \
+            git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} -- pkgbuilds/**/PKGBUILD \
             | xargs -n 1 dirname \
             | sed 's|^pkgbuilds/||' \
             | xargs -n 1 basename \
