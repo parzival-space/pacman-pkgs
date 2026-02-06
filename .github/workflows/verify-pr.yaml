@@ -18,6 +18,7 @@ env:
 
 jobs:
   find_packages_with_changes:
+    name: Find packages with changes
     runs-on: ubuntu-latest
     outputs:
       packages: ${{ steps.set-packages.outputs.packages }}
@@ -42,6 +43,7 @@ jobs:
           echo "Found packages with changes: $packages"
 
   build_packages:
+    name: Build ${{ matrix.name }}
     needs: find_packages_with_changes
     runs-on: ubuntu-latest
     container:
