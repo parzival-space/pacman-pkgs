@@ -69,3 +69,12 @@ jobs:
         working-directory: ./${{ env.PKGBUILDS_DIR }}/${{ matrix.name }}
         run: |
           sudo -u builder makepkg -sri --noconfirm
+      - name: Rename package files for GitHub compatibility
+        run: |
+          find ./${{ env.PKGBUILDS_DIR }}/${{ matrix.name }}/ -name "*.pkg.tar.zst" -exec bash -c 'mv "$0" "${0//:/_}"' {} \;
+      - name: Upload ${{ matrix.name }} package artifact
+        uses: actions/upload-artifact@v6.0.0
+        with:
+          name: ${{ matrix.name }}-package
+          include-hidden-files: 'true'
+          path: ./${{ env.PKGBUILDS_DIR }}/${{ matrix.name }}/*.pkg.tar.zst
