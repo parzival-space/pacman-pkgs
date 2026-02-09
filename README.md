@@ -6,7 +6,7 @@
 Package sources I maintain or co-maintain for the Arch User Repository (AUR) and some other non-AUR packages.
 
 ### Contributing
-The package sources in this repository are maintained on a case-by-case basis.
+The package sources in this repository are updated on a case-by-case basis.
 If you find an outdated package, feel free to open an issue or a pull request with the updated PKGBUILD.
 
 ### Using the 'parzival-space' Repository
