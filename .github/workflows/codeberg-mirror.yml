@@ -1,0 +1,19 @@
+name: Mirror to Codeberg.org
+on: [push]
+
+jobs:
+  sync-mirror:
+    name: Mirror to Codeberg.org
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: yesolutions/mirror-action@master
+        with:
+          REMOTE: '${{ secrets.CODEBERG_REMOTE }}'
+          GIT_SSH_PRIVATE_KEY: ${{ secrets.CODEBERG_DEPLOY_KEY }}
+          GIT_SSH_NO_VERIFY_HOST: "true"
+    
