@@ -3,7 +3,7 @@
 
 pkgname=parzival-gaming-meta
 pkgver=1.0.0
-pkgrel=1
+pkgrel=2
 arch=(any)
 pkgdesc='Meta package for Gaming dependencies'
 depends=(
@@ -13,7 +13,7 @@ depends=(
   gst-plugins-base-libs
   lib32-alsa-plugins
   lib32-giflib
-  lib32-gst-plugins-base-libs
+  #lib32-gst-plugins-base-libs # no longer available in multilib repository
   lib32-gtk3
   lib32-libjpeg-turbo
   lib32-libva
