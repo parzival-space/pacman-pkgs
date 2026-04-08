@@ -13,7 +13,7 @@ depends=(
   gst-plugins-base-libs
   lib32-alsa-plugins
   lib32-giflib
-  lib32-gst-plugins-base-libs
+  #lib32-gst-plugins-base-libs # no longer available in multilib repository
   lib32-gtk3
   lib32-libjpeg-turbo
   lib32-libva
