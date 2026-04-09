@@ -81,7 +81,7 @@ jobs:
           echo "${latest_commit}" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
       - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.2
         if: steps.aur_check.outputs.ignore != 'true'
         with:
           pkgname: ${{ matrix.package }}
