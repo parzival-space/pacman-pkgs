@@ -45,6 +45,8 @@ jobs:
     name: "Verify build for ${{ matrix.package }}"
     needs: find_packages
     runs-on: ubuntu-latest
+    container:
+      image: archlinux:multilib-devel
     strategy:
       matrix:
         package: ${{ fromJson(needs.find_packages.outputs.packages) }}
