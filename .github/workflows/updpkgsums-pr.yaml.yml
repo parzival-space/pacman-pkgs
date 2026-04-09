@@ -68,14 +68,14 @@ jobs:
       - name: Recalculate Checksums
         working-directory: ./${{ env.PKGBUILDS_DIR }}
         env:
-          CHANGED_PACKAGES: ${{ fromJson(needs.find_packages_with_changes.outputs.packages) }}
+          CHANGED_PACKAGES: ${{ needs.find_packages_with_changes.outputs.packages }}
         run: |
-          # loop through all changed CHANGED_PACKAGES
-          for package in ${CHANGED_PACKAGES//\"/}; do
-              echo "Updating checksums for $package"
-              cd ./$package
-              sudo -u builder updpkgsums
-              cd ..
+          pacman -S --noconfirm jq
+          for package in $(echo "$CHANGED_PACKAGES" | jq -r '.[]'); do
+            echo "Updating checksums for $package"
+            cd ./$package
+            sudo -u builder updpkgsums
+            cd ..
           done
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v7
