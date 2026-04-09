@@ -57,7 +57,7 @@ jobs:
       - name: Update system & install requirements
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm base-devel git sudo
+          pacman -S --noconfirm base-devel git sudo jq pacman-contrib
       - name: Checkout build sources
         uses: actions/checkout@v6
       - name: Create build user
@@ -70,7 +70,6 @@ jobs:
         env:
           CHANGED_PACKAGES: ${{ needs.find_packages_with_changes.outputs.packages }}
         run: |
-          pacman -S --noconfirm jq
           for package in $(echo "$CHANGED_PACKAGES" | jq -r '.[]'); do
             echo "Updating checksums for $package"
             cd ./$package
