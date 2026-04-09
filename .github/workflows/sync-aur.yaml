@@ -92,7 +92,7 @@ jobs:
               # split at :: and check last entry for URL prefix
               src_file=$(echo "$src" | awk -F '::' '{print $NF}')
               if [[ ! "$src_file" =~ ^https?:// ]]; then
-                  echo "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/$src_file" >> $GITHUB_OUTPUT
+                  echo "$src_file" >> $GITHUB_OUTPUT
               fi
           done
           echo "EOF" >> $GITHUB_OUTPUT
@@ -109,5 +109,6 @@ jobs:
           test: true
           test_flags: '--clean --cleanbuild --syncdeps --install --noconfirm'
           allow_empty_commits: false # prevent commits with no changes
-          assets: ${{ steps.collect_assets.outputs.assets }}
+          assets: |
+            ${{ steps.collect_assets.outputs.assets }}
 
