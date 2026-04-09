@@ -70,7 +70,9 @@ jobs:
 
   sync_with_aur:
     name: "Sync ${{ matrix.package }}"
-    needs: find_packages
+    needs:
+      - find_packages
+      - verify_build
     runs-on: ubuntu-latest
     strategy:
       matrix:
