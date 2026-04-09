@@ -21,6 +21,7 @@ env:
 
 jobs:
   find_packages_with_changes:
+    if: ${{ startsWith(github.head_ref, 'renovate/') }}
     name: Find packages with changes
     runs-on: ubuntu-latest
     outputs:
@@ -46,6 +47,7 @@ jobs:
           echo "Found packages with changes: $packages"
 
   update_checksums:
+    if: ${{ startsWith(github.head_ref, 'renovate/') }}
     name: Update Checksums
     needs: find_packages_with_changes
     runs-on: ubuntu-latest
@@ -56,6 +58,18 @@ jobs:
     env:
       BUILD_USER: builder
     steps:
+      - name: Detect repository name
+        id: detect_repository_name
+        run: echo "value=${GITHUB_REPOSITORY#*/}" >> $GITHUB_OUTPUT
+      - name: Get token
+        id: get_token
+        uses: actions/create-github-app-token@v3
+        with:
+          private-key: ${{ secrets.RENOVATE_PRIVATE_KEY }}
+          app-id: ${{ secrets.RENOVATE_APP_ID }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ steps.detect_repository_name.outputs.value }}
       - name: Update system & install requirements
         run: |
           pacman -Syu --noconfirm
@@ -63,6 +77,7 @@ jobs:
       - name: Checkout build sources
         uses: actions/checkout@v6
         with:
+          token: '${{ steps.get_token.outputs.token }}'
           ref: ${{ github.head_ref }}
       - name: Create build user
         run: |
