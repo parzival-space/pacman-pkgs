@@ -92,7 +92,7 @@ jobs:
               # split at :: and check last entry for URL prefix
               src_file=$(echo "$src" | awk -F '::' '{print $NF}')
               if [[ ! "$src_file" =~ ^https?:// ]]; then
-                  echo "$src_file" >> $GITHUB_OUTPUT
+                  echo "${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/$src_file" >> $GITHUB_OUTPUT
               fi
           done
           echo "EOF" >> $GITHUB_OUTPUT
