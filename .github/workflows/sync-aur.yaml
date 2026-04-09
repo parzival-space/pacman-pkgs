@@ -93,4 +93,6 @@ jobs:
           test: true
           test_flags: '--clean --cleanbuild --syncdeps --install --noconfirm'
           allow_empty_commits: false # prevent commits with no changes
+          assets: |
+            ./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/**
 
