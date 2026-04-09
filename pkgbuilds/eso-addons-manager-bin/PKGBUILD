@@ -18,7 +18,7 @@ source=(
   "eso-addon-manager-$pkgver::https://github.com/arviceblot/eso-addons/releases/download/v${pkgver}/eso-addon-manager-x86_64-unknown-linux-gnu"
   "com.arviceblot.eso-addon-manager.png::https://raw.githubusercontent.com/arviceblot/eso-addons/refs/tags/v${pkgver}/data/icon.png"
   "LICENSE-$pkgver::https://raw.githubusercontent.com/arviceblot/eso-addons/refs/tags/v${pkgver}/LICENSE"
-  "com.arviceblot.eso-addon-manager.desktop::com.arviceblot.eso-addon-manager.desktop"
+  "com.arviceblot.eso-addon-manager.desktop"
 )
 sha256sums=(
   "aecc593a10febc729119888d9fdfc8b31f71c97dde3cf810129882de1461cdc6"
