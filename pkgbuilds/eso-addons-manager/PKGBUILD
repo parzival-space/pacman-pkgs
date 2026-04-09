@@ -21,7 +21,7 @@ makedepends=(
 
 source=(
   "$pkgname-$pkgver.tar.gz::https://github.com/arviceblot/eso-addons/archive/refs/tags/v$pkgver.tar.gz"
-  "com.arviceblot.eso-addon-manager.desktop::com.arviceblot.eso-addon-manager.desktop"
+  "com.arviceblot.eso-addon-manager.desktop"
 )
 sha256sums=(
   "2b73ffe141f0e7cc86d427a8e941f13a31d5e08ced573c25aea4eec648f1274e"
