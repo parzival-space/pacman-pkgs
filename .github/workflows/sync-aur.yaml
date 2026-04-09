@@ -66,7 +66,7 @@ jobs:
           echo "${{ env.BUILD_USER }} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
           chown -R builder:builder .
       - name: Build ${{ matrix.name }}
-        working-directory: ./${{ env.PKGBUILDS_DIR }}/${{ matrix.name }}
+        working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
         run: |
           sudo -u builder makepkg -sri --noconfirm
 
