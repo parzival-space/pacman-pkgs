@@ -1,0 +1,82 @@
+name: Update Package Sums on PR
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+    branches:
+      - development
+    paths:
+      - pkgbuilds/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: updpkgsums-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PKGBUILDS_DIR: pkgbuilds
+
+jobs:
+  find_packages_with_changes:
+    name: Find packages with changes
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.set-packages.outputs.packages }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Find packages with changes
+        id: set-packages
+        run: |
+          # find directories in pkgbuilds containing a PKGBUILD that have changes in the PR
+          packages=$(
+            git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} -- pkgbuilds/**/PKGBUILD \
+            | xargs -n 1 dirname \
+            | sed 's|^pkgbuilds/||' \
+            | xargs -n 1 basename \
+            | sort -u \
+            | awk '{ printf "%s\"%s\"", sep, $0; sep=", " }'
+          )
+          echo "packages=[$packages]" >> $GITHUB_OUTPUT
+          echo "Found packages with changes: $packages"
+
+  build_packages:
+    name: Update Checksums
+    needs: find_packages_with_changes
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:multilib-devel
+    env:
+      BUILD_USER: builder
+    steps:
+      - name: Update system & install requirements
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm base-devel git sudo jq pacman-contrib
+      - name: Checkout build sources
+        uses: actions/checkout@v6
+      - name: Create build user
+        run: |
+          useradd -m ${{ env.BUILD_USER }}
+          echo "${{ env.BUILD_USER }} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          chown -R builder:builder .
+      - name: Recalculate Checksums
+        working-directory: ./${{ env.PKGBUILDS_DIR }}
+        env:
+          CHANGED_PACKAGES: ${{ needs.find_packages_with_changes.outputs.packages }}
+        run: |
+          for package in $(echo "$CHANGED_PACKAGES" | jq -r '.[]'); do
+            echo "Updating checksums for $package"
+            cd ./$package
+            sudo -u builder updpkgsums
+            cd ..
+          done
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          file_pattern: '*/PKGBUILD'
