@@ -80,6 +80,22 @@ jobs:
           echo "Latest commit message:" >> $GITHUB_OUTPUT
           echo "${latest_commit}" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+      - name: Collect additional assets
+        working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
+        id: collect_assets
+        run: |
+          # load PKGBUILD source PKGBUILD and specify all assets not starting with http:// or https://
+          #
+          source "./PKGBUILD"
+          echo "assets<<EOF" >> $GITHUB_OUTPUT
+          for src in ${source[@]}; do
+              # split at :: and check last entry for URL prefix
+              src_file=$(echo "$src" | awk -F '::' '{print $NF}')
+              if [[ ! "$src_file" =~ ^https?:// ]]; then
+                  echo "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/$src_file" >> $GITHUB_OUTPUT
+              fi
+          done
+          echo "EOF" >> $GITHUB_OUTPUT
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.2
         if: steps.aur_check.outputs.ignore != 'true'
@@ -93,6 +109,5 @@ jobs:
           test: true
           test_flags: '--clean --cleanbuild --syncdeps --install --noconfirm'
           allow_empty_commits: false # prevent commits with no changes
-          assets: |
-            ./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/**
+          assets: ${{ steps.collect_assets.outputs.assets }}
 
