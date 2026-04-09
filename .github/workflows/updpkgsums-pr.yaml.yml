@@ -45,10 +45,12 @@ jobs:
           echo "packages=[$packages]" >> $GITHUB_OUTPUT
           echo "Found packages with changes: $packages"
 
-  build_packages:
+  update_checksums:
     name: Update Checksums
     needs: find_packages_with_changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     container:
       image: archlinux:multilib-devel
     env:
@@ -57,14 +59,11 @@ jobs:
       - name: Update system & install requirements
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm base-devel git sudo jq pacman-contrib
+          pacman -S --noconfirm base-devel git jq pacman-contrib
       - name: Checkout build sources
         uses: actions/checkout@v6
-      - name: Create build user
-        run: |
-          useradd -m ${{ env.BUILD_USER }}
-          echo "${{ env.BUILD_USER }} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-          chown -R builder:builder .
+        with:
+          ref: ${{ github.head_ref }}
       - name: Recalculate Checksums
         working-directory: ./${{ env.PKGBUILDS_DIR }}
         env:
@@ -73,10 +72,12 @@ jobs:
           for package in $(echo "$CHANGED_PACKAGES" | jq -r '.[]'); do
             echo "Updating checksums for $package"
             cd ./$package
-            sudo -u builder updpkgsums
+            updpkgsums
             cd ..
           done
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
+          commit_message: 'Update PKGBUILD checksums'
           file_pattern: '*/PKGBUILD'
+          commit_options:
