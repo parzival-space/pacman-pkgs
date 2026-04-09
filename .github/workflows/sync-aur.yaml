@@ -111,6 +111,11 @@ jobs:
           echo "Latest commit message:" >> $GITHUB_OUTPUT
           echo "${latest_commit}" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+      - name: Add NOTICE.md
+        working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
+        run: |
+          echo "This package is automatically built and published from the GitHub repository at https://github.com/${{ github.repository }}." > NOTICE.md
+          echo "If you want to contribute, please open an issue or a pull request in the repository." >> NOTICE.md
       - name: Collect additional assets
         working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
         id: collect_assets
@@ -126,6 +131,7 @@ jobs:
                   echo "${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/$src_file" >> $GITHUB_OUTPUT
               fi
           done
+          echo "${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/NOTICE.md" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.2
