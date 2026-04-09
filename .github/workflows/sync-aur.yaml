@@ -85,7 +85,7 @@ jobs:
         id: collect_assets
         run: |
           # load PKGBUILD source PKGBUILD and specify all assets not starting with http:// or https://
-          #
+          # workaround for https://github.com/KSXGitHub/github-actions-deploy-aur/issues/36
           source "./PKGBUILD"
           echo "assets<<EOF" >> $GITHUB_OUTPUT
           for src in ${source[@]}; do
