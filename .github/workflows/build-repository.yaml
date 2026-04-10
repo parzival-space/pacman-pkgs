@@ -74,7 +74,7 @@ jobs:
         run: |
           find ./${{ env.PKGBUILDS_DIR }}/${{ matrix.name }}/ -name "*.pkg.tar.zst" -exec bash -c 'mv "$0" "${0//:/_}"' {} \;
       - name: Upload ${{ matrix.name }} package artifact
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: ${{ matrix.name }}-package
           include-hidden-files: 'true'
