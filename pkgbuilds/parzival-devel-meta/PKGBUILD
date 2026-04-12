@@ -16,7 +16,6 @@ depends=(
   # rust
   rust
   rust-analyzer
-  rust-clippy
 
   # java
   jdk-openjdk
@@ -27,8 +26,6 @@ depends=(
   # shell
   ttf-jetbrains-mono-nerd
   zsh
-  oh-my-zsh-git
-  zsh-theme-powerlevel10k-git
 )
 
 source=()
