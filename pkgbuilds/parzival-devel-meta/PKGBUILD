@@ -1,0 +1,35 @@
+# Maintainer: Malte Linke <me@parzival.space>
+
+pkgname=parzival-devel-meta
+pkgver=1.0.0
+pkgrel=2
+arch=(any)
+pkgdesc='Meta package for Development dependencies'
+depends=(
+  git
+  base-devel
+
+  # docker (might replace this with podman)
+  docker
+  docker-compose
+
+  # rust
+  rust
+
+  # java
+  jdk-openjdk
+  jre-openjdk
+
+  # node
+  fnm
+
+  # shell
+  ttf-jetbrains-mono-nerd
+  zsh
+  oh-my-zsh-git
+  zsh-theme-powerlevel10k-git
+)
+
+source=()
+sha256sums=()
+
