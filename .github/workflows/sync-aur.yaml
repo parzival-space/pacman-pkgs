@@ -29,10 +29,15 @@ jobs:
       - name: Find packages
         id: set-packages
         run: |
-          # find directories in pkgbuilds containing a PKGBUILD
+          # find directories in pkgbuilds containing a PKGBUILD and not marked with .no-aur-sync
           packages=$(
             find ${{ env.PKGBUILDS_DIR }} -mindepth 2 -maxdepth 2 -type f -name PKGBUILD \
             -exec dirname {} \; \
+            | while read -r pkgdir; do
+                if [ ! -f "$pkgdir/.no-aur-sync" ]; then
+                  echo "$pkgdir"
+                fi
+              done \
             | sed 's|^pkgbuilds/||' \
             | xargs -n 1 basename \
             | sort -u \
