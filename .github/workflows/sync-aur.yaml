@@ -88,17 +88,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Check if package should be ignored
-        working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
-        id: aur_check
-        run: |
-          # ignore packages that contain a .no-aur-sync file
-          if [ -f .no-aur-sync ]; then
-              echo "Package ${{ matrix.package }} is marked to be ignored for AUR sync."
-              echo "ignore=true" >> $GITHUB_OUTPUT
-          else
-              echo "ignore=false" >> $GITHUB_OUTPUT
-          fi
       - name: Generate commit message
         working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
         id: commit_message
@@ -140,7 +129,6 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.2
-        if: steps.aur_check.outputs.ignore != 'true'
         with:
           pkgname: ${{ matrix.package }}
           pkgbuild: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/PKGBUILD"
