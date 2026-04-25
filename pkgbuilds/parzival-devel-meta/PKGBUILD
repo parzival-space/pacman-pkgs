@@ -2,7 +2,7 @@
 
 pkgname=parzival-devel-meta
 pkgver=1.0.0
-pkgrel=2
+pkgrel=3
 arch=(any)
 pkgdesc='Meta package for Development dependencies'
 depends=(
@@ -12,6 +12,9 @@ depends=(
   # docker (might replace this with podman)
   docker
   docker-compose
+
+  # k8s
+  minikube
 
   # rust
   rust
