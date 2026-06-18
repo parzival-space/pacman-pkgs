@@ -24,7 +24,7 @@ jobs:
       packages: ${{ steps.set-packages.outputs.packages }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Find packages with changes
@@ -59,7 +59,7 @@ jobs:
           pacman -Syu --noconfirm
           pacman -S --noconfirm base-devel git sudo
       - name: Checkout build sources
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Create build user
         run: |
           useradd -m ${{ env.BUILD_USER }}

@@ -25,7 +25,7 @@ jobs:
       packages: ${{ steps.set-packages.outputs.packages }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Find packages
         id: set-packages
         run: |
@@ -64,7 +64,7 @@ jobs:
           pacman -Syu --noconfirm
           pacman -S --noconfirm base-devel git sudo
       - name: Checkout build sources
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Create build user
         run: |
           useradd -m ${{ env.BUILD_USER }}
@@ -87,7 +87,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Generate commit message
         working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
         id: commit_message
