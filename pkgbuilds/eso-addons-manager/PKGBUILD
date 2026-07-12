@@ -23,7 +23,7 @@ source=(
   "$pkgname-$pkgver.tar.gz::https://github.com/arviceblot/eso-addons/archive/refs/tags/v$pkgver.tar.gz"
   "com.arviceblot.eso-addon-manager.desktop"
 )
-sha256sums=('5a5c4711ba6586d25d1228a1b981012aa32de8512fedfc1089ca4fa2835ca112'
+sha256sums=('338acb8f6d73642cfbf1d173f19e9b43203ce71cc528204657e9a05b8ce9218e'
             '4fc6d1df6ca640527e1f7a2e7718d487cd1d5677785724b0803c76ef8e466e5e')
 
 prepare() {
