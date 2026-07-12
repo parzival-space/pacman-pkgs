@@ -1,9 +1,9 @@
 # Maintainer: Malte Linke <me@parzival.space>
 
-pkgname=wooting-bg-service
+pkgname=wooting-bg-service-beta
 pkgdesc='Wooting Background Service for Wootility'
-pkgver=0.4.8
-pkgrel=2
+pkgver=0.5.0_beta.2
+pkgrel=1
 arch=('x86_64')
 url="https://wooting.io/wootility"
 license=(unknown)
@@ -16,8 +16,8 @@ _appImageFile="${pkgname}-${pkgver}.AppImage"
 _desktopFile="Wooting Background Service.desktop"
 
 noextract=("${_appImageFile}")
-source=("${_appImageFile}::https://api.wooting.io/public/bg-service/download-installer?target=linux&version=${pkgver}")
-sha256sums=('b327b3871dcc139c05c4b6dadd6ebe51dacf1740df6f109dd6efbac970abeb32')
+source=("${_appImageFile}::https://api.wooting.io/public/bg-service/download-installer?target=linux&version=${pkgver//_/-}")
+sha256sums=('a1d0b99cbf076e64ba046f401d236f901d93e27a5305fc45a1309b2708c3aabe')
 
 prepare() {
   # create copy of appimage file in case the build dir is mounted with noexec
@@ -44,7 +44,7 @@ package() {
 
   # Symlink executable
   install -d "${pkgdir}/usr/bin/"
-  ln -s /opt/${pkgname}/${_appImageFile} "${pkgdir}/usr/bin/${pkgname}"
+  ln -s /opt/${pkgname}/${_appImageFile} "${pkgdir}/usr/bin/${pkgname//-beta/}"
 
   # Install desktop entry and icons
   install -Dm644 "squashfs-root/usr/share/applications/${_desktopFile}" -t "${pkgdir}/usr/share/applications"
