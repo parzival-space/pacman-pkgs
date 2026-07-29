@@ -1,0 +1,37 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "dependencyDashboard": true,
+  "branchConcurrentLimit": 10,
+  "prConcurrentLimit": 10,
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/(^|/)PKGBUILD$/"],
+      "matchStrings": [
+        "pkgver=(?<currentValue>.*) # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*) versioning=(?<versioning>.*)"
+      ],
+      "extractVersionTemplate": "^v?(?<version>.*)$"
+    }
+  ],
+  "customDatasources": {
+    // Wootility Background Service Registry
+    // The registry URL is a bit weird, it requires us to send the current_version. Normally this wouldn't be an
+    // issue, but we are using the AUR packages version format, which does not allow the usage of hyphens, so we
+    // either need to remap underscores to hyphens or just always send 0.0.0 as current_version.
+    "wooting-bg-service": {
+      "defaultRegistryUrlTemplate": "https://api.wooting.io/public/bg-service/update-check?target=linux&current_version=0.0.0&arch=x86_64&channel=stable",
+      "format": "json",
+      "transformTemplates": [
+        "{ \"releases\": [ { \"version\": $string(version) } ] }"
+      ]
+    },
+    "wooting-bg-service-beta": {
+      "defaultRegistryUrlTemplate": "https://api.wooting.io/public/bg-service/update-check?target=linux&current_version=0.0.0&arch=x86_64&channel=beta",
+      "format": "json",
+      "transformTemplates": [
+        "{ \"releases\": [ { \"version\": $string(version) } ] }"
+      ]
+    }
+  }
+}
