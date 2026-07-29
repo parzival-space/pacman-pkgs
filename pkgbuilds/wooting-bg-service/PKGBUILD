@@ -2,7 +2,7 @@
 
 pkgname=wooting-bg-service
 pkgdesc='Wooting Background Service for Wootility'
-pkgver=0.5.0
+pkgver=0.5.0 # renovate: datasource=custom.wooting-bg-service depName=wooting-bg-service-beta versioning=semver
 pkgrel=2
 arch=('x86_64')
 url="https://wooting.io/wootility"
