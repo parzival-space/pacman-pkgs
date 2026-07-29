@@ -9,9 +9,25 @@
       "customType": "regex",
       "managerFilePatterns": ["/(^|/)PKGBUILD$/"],
       "matchStrings": [
-        "pkgver=(?<currentValue>.*) # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*)"
+        "pkgver=(?<currentValue>.*) # renovate: datasource=(?<datasource>.*) depName=(?<depName>.*) versioning=(?<versioning>.*)"
       ],
       "extractVersionTemplate": "^v?(?<version>.*)$"
     }
-  ]
+  ],
+  "customDatasources": {
+    "wooting-bg-service": {
+      "defaultRegistryUrlTemplate": "https://api.wooting.io/public/bg-service/update-check?target=linux&current_version={{currentValue}}&arch=x86_64&channel=stable",
+      "format": "json",
+      "transformTemplates": [
+        "{ \"releases\": [ { \"version\": $string(version) } ] }"
+      ]
+    },
+    "wooting-bg-service-beta": {
+      "defaultRegistryUrlTemplate": "https://api.wooting.io/public/bg-service/update-check?target=linux&current_version={{currentValue}}&arch=x86_64&channel=beta",
+      "format": "json",
+      "transformTemplates": [
+        "{ \"releases\": [ { \"version\": $string(version) } ] }"
+      ]
+    }
+  }
 }
