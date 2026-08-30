@@ -9,7 +9,7 @@ Package sources I maintain or co-maintain for the Arch User Repository (AUR) and
 The package sources in this repository are maintained on a case-by-case basis.
 If you find an outdated package, feel free to open an issue or a pull request with the updated PKGBUILD.
 
-### Using the 'parzival-space' Repository
+<!-- ### Using the 'parzival-space' Repository
 Prebuilt packages, including some packages not published to the AUR, are published to a custom Pacman repository.
 The packages are built using GitHub Actions. You can read the workflow file [here](.github/workflows/build-repository.yaml) for more details.
 
@@ -20,4 +20,4 @@ SigLevel = Optional TrustAll
 Server = https://github.com/parzival-space/pacman-pkgs/releases/download/repository
 ```
 Then, run `sudo pacman -Sy` to update your package database.
-
+-->
