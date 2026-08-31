@@ -9,10 +9,10 @@
 *.log
 *.log.*
 *.sig
+pkgbuilds/*/LICENSE
 
 ### ArchLinux Repo ###
 .repo
-
 pkg/
 src/
 .vscode/
