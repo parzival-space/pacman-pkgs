@@ -83,6 +83,7 @@ jobs:
           
           chown -R "$BUILD_USER:$BUILD_USER" /build
           
+          cd /build
           sudo -H -u "$BUILD_USER" makepkg -sri --noconfirm
           EOF
       - name: Generate commit message
