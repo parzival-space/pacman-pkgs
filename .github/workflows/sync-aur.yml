@@ -1,10 +1,10 @@
 name: Sync AUR packages
 on:
-#  push:
-#    branches:
-#      - development
-#    paths:
-#      - pkgbuilds/**
+  push:
+    branches:
+      - development
+    paths:
+      - pkgbuilds/**
   workflow_dispatch:
 
 permissions:
@@ -46,40 +46,10 @@ jobs:
           echo "packages=[$packages]" >> $GITHUB_OUTPUT
           echo "Found packages: $packages"
 
-  verify_build:
-    name: "Verify build for ${{ matrix.package }}"
-    needs: find_packages
-    runs-on: ubuntu-latest
-    container:
-      image: archlinux:multilib-devel
-    strategy:
-      matrix:
-        package: ${{ fromJson(needs.find_packages.outputs.packages) }}
-      fail-fast: false
-    env:
-      BUILD_USER: builder
-    steps:
-      - name: Update system & install requirements
-        run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm base-devel git sudo
-      - name: Checkout build sources
-        uses: actions/checkout@v7
-      - name: Create build user
-        run: |
-          useradd -m ${{ env.BUILD_USER }}
-          echo "${{ env.BUILD_USER }} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-          chown -R builder:builder .
-      - name: Build ${{ matrix.name }}
-        working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
-        run: |
-          sudo -u builder makepkg -sri --noconfirm
-
   sync_with_aur:
     name: "Sync ${{ matrix.package }}"
     needs:
       - find_packages
-      - verify_build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -136,7 +106,7 @@ jobs:
           commit_email: ${{ secrets.AUR_EMAIL }}
           commit_username: ${{ secrets.AUR_USERNAME }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          test: false # already tested in previous job
+          test: true
           allow_empty_commits: false # prevent commits with no changes
           assets: ${{ steps.collect_assets.outputs.assets }}
 
