@@ -75,7 +75,7 @@ jobs:
           
           rm -rf /build
           mkdir -p /build
-          cp -a /repo/. /build
+          cp -a /repo/${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}/. /build
           
           useradd -m $BUILD_USER
           echo "$BUILD_USER ALL=(ALL) NOPASSWD: ALL" > "/etc/sudoers.d/$BUILD_USER"
