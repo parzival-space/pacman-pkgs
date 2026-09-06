@@ -58,6 +58,33 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+      - name: Test Build
+        env:
+          BUILD_USER: builder
+        run: |
+          # build package in a container instead of using the test flag in the aur sync step.
+          # the aur sync step is unable to install build dependencies
+          podman run --rm -i \
+            -e BUILD_USER \
+            -v "$(pwd):/repo:ro" \
+            archlinux:multilib-devel bash -s <<'EOF'
+          set -Eeuo pipefail
+          
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm base-devel git sudo
+          
+          rm -rf /build
+          mkdir -p /build
+          cp -a /repo/. /build
+          
+          useradd -m $BUILD_USER
+          echo "$BUILD_USER ALL=(ALL) NOPASSWD: ALL" > "/etc/sudoers.d/$BUILD_USER"
+          chmod 0440 "/etc/sudoers.d/$BUILD_USER"
+          
+          chown -R "$BUILD_USER:$BUILD_USER" /build
+          
+          sudo -H -u "$BUILD_USER" makepkg -sri --noconfirm
+          EOF
       - name: Generate commit message
         working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
         id: commit_message
@@ -78,7 +105,7 @@ jobs:
       - name: Add NOTICE.md
         working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
         run: |
-          echo "This package is automatically built and published from the GitHub repository at https://github.com/${{ github.repository }}." > NOTICE.md
+          echo "This package was automatically built and published from the GitHub repository at https://github.com/${{ github.repository }}." > NOTICE.md
           echo "If you want to contribute, please open an issue or a pull request in the repository." >> NOTICE.md
       - name: Collect additional assets
         working-directory: "./${{ env.PKGBUILDS_DIR }}/${{ matrix.package }}"
@@ -106,8 +133,7 @@ jobs:
           commit_email: ${{ secrets.AUR_EMAIL }}
           commit_username: ${{ secrets.AUR_USERNAME }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          test: true
-          test_flags: '--clean --cleanbuild -s'
+          test: false # already tested
           allow_empty_commits: false # prevent commits with no changes
           assets: ${{ steps.collect_assets.outputs.assets }}
 
