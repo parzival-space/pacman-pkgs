@@ -3,7 +3,7 @@
 
 pkgname=fluorine-manager-bin
 pkgdesc='A native Linux mod manager for Bethesda and other games, built on MO2'
-pkgver=0.3.3 # renovate: datasource=github-tags depName=SulfurNitride/Fluorine-Manager versioning=semver
+pkgver=0.3.4 # renovate: datasource=github-tags depName=SulfurNitride/Fluorine-Manager versioning=semver
 pkgrel=1
 arch=('x86_64')
 url='https://github.com/SulfurNitride/Fluorine-Manager'
