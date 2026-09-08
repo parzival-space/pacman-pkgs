@@ -30,5 +30,13 @@
         "{ \"releases\": [ { \"version\": $string(version) } ] }"
       ]
     }
-  }
+  },
+  "packageRules": [
+    {
+      // allow auto merges for GitHub Action patch updates
+      "matchDatasources": ["github-actions"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    }
+  ]
 }
