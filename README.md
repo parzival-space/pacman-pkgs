@@ -1,5 +1,5 @@
 ## parzival-space's Arch Packages
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/parzival-space/pacman-pkgs/sync-aur.yaml?style=for-the-badge&logo=archlinux&label=AUR%20Sync&color=blue)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/parzival-space/pacman-pkgs/sync-aur.yml?style=for-the-badge&logo=archlinux&label=AUR%20Sync&color=blue)
 
 
 Package sources I maintain or co-maintain for the Arch User Repository (AUR) and some other non-AUR packages.
