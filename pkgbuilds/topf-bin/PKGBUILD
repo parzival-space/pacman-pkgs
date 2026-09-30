@@ -2,7 +2,7 @@
 
 pkgname=topf-bin
 pkgdesc='Talos orchestrator by PostFinance'
-pkgver=0.6.0 # renovate: datasource=github-tags depName=postfinance/topf versioning=semver
+pkgver=0.6.1 # renovate: datasource=github-tags depName=postfinance/topf versioning=semver
 pkgrel=1
 arch=('x86_64' 'aarch64')
 url="https://github.com/postfinance/topf"
