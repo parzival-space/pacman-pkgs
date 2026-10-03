@@ -20,15 +20,14 @@ source=("${_releaseArchive}::https://github.com/SulfurNitride/Fluorine-Manager/r
         "disable-desktop-sync.patch")
 sha256sums=('ae048a1521b2e6b382b23c8b0b44ab3d8cc99cd4ccd028d5e21975f6b72ce5d1'
             '8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903'
-            '4369d2dfe6d61cc2b907c6441fa120b58e84011246be18cb1c470458ea4209b9')
+            'f76a7e83ed721beccb23a36241f40485352045ac82632a594f319504a359bfec')
 noextract=("${_releaseArchive}")
 
 prepare() {
-  mkdir -p "${srcdir}/fluorine-manager"
-  bsdtar -xf "${_releaseArchive}" -C "${srcdir}/fluorine-manager"
+  bsdtar -xf "${_releaseArchive}" -C "${srcdir}"
 
   # remove the post-installation sync to the user home from the wrapper script
-  patch -d "${srcdir}/fluorine-manager" -tNp1 -i ../disable-desktop-sync.patch
+  patch -d "${srcdir}/fluorine-manager" -tNp0 -i ../disable-desktop-sync.patch
 }
 
 package() {
