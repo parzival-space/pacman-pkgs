@@ -2,7 +2,9 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", ":semanticCommits"],
 
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
 
   "branchConcurrentLimit": 10,
   "prConcurrentLimit": 10,
@@ -43,6 +45,11 @@
       "matchDatasources": ["github-actions"],
       "matchUpdateTypes": ["patch"],
       "automerge": true
+    },
+    {
+      // allow unstable updates for beta packages
+      "matchPackageNames": ["wooting-bg-service-beta"],
+      "ignoreUnstable": false
     }
   ]
 }
